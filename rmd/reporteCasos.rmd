@@ -1,0 +1,64 @@
+---
+title: "Reporte de la provincia de `r params$provincia`"
+output: 
+  html_document: 
+    df_print: paged
+date: "`r Sys.Date()`"
+params:
+  provincia: "SAN JOSE"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(here)
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r comment=''}
+casos <- read_rds(here("data/clean/casos.rds"))
+casos_df <- data.frame(casos)
+casos <- subset(casos, provincia == params$provincia)
+caso_df<-data.frame(casos)
+DT::datatable(casos)
+
+observaciones_provincia<-nrow(caso_df)
+observaciones_totales<-nrow(casos_df)
+
+cat(paste("La cantidad de observaciones en",params$provincia,"fueron de",observaciones_provincia,"y la cantidad de observaciones en total fue de", observaciones_totales))
+
+min_casos_activos_provincia<-min(caso_df$activos)
+min_casos_activos_total<-min(casos_df$activos)
+
+cat(paste("La cantidad de casos mínimos en",params$provincia,"fueron de",min_casos_activos_provincia,"y la cantidad mínima en la totalidad de casos fue", min_casos_activos_total))
+
+max_casos_activos_provincia <-max(caso_df$activos)
+max_casos_activos_total<-max(casos_df$activos)
+
+cat(paste("La cantidad de casos máximos en",params$provincia,"fueron de",max_casos_activos_provincia,"y la cantidad máxima en su totalidad fue de",max_casos_activos_total))
+
+prom_casos_activos_provincia <-mean(caso_df$activos)
+prom_casos_activos_total <-mean(casos_df$activos)
+
+cat(paste("El promedio de casos activos en",params$provincia,"fueron de",prom_casos_activos_provincia,"y el promedio de casos activos en su totalidad es de",prom_casos_activos_total))
+
+caso_provincia <-caso_df$provincia
+caso_activo_provincia <-caso_df$activos
+
+ggplot(caso_df, aes(x=caso_activo_provincia, y=caso_provincia)) + 
+  geom_bar(position='stack', stat='identity') +
+  coord_flip()+
+  xlab("Casos Activos") + 
+  ylab("Provincia")                 +
+  ggtitle("Casos activos por provincia ")  
+
+ggplot(caso_df, aes(x=caso_provincia, y=caso_activo_provincia)) + 
+      geom_point() + 
+      labs(title = "Casos activos por provincia", x = "Provincia", y = "Cantidad de Casos Activos")
+
+ggplot(data=caso_df, aes(x=caso_provincia, y=caso_activo_provincia)) + 
+  geom_point(size=5,col="blue",pch=4) +
+labs(title = "Casos activos por provincia", x = "Provincia", y = "Cantidad de Casos Activos")
+
+```
